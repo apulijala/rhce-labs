@@ -1,0 +1,221 @@
+Lab 10.2
+--------------
+cat vars.yml
+vsftpd_package: vsftpd
+vsftpd_service: vsftpd
+vsftpd_config_file: /etc/vsftpd/vsftpd.conf
+
+cat vsftpd.conf.j2
+connect_from_port_20={{ 'YES' if vsftpd_connect_from_port_20 else 'NO' }}
+listen={{ 'YES' if vsftpd_listen else 'NO' }}
+pam_service_name=vsftpd
+syslog_enable={{ 'YES' if vsftpd_syslog_enable else 'NO' }}
+
+
+anonymous_enable={{ 'YES' if vsftpd_anonymous_enable else 'NO' }}
+
+{% if vsftpd_anon_root is defined %}llc
+anon_root={{ vsftpd_anon_root }}
+{% endif %}
+
+
+local_enable={{ 'YES' if vsftpd_write_enable else 'NO' }}
+
+{% if vsftpd_local_root is defined %}
+local_root={{ vsftpd_local_root }}
+{% endif %}
+
+local_umask=022
+write_enable={{ 'YES' if vsftpd_write_enable else 'NO' }}
+
+chroot_local_user={{ 'YES' if vsftpd_chroot_local_user else 'NO' }}
+
+pasv_enable=Yes
+pasv_min_port=21000
+pasv_max_port=22000
+
+
+cat defaults-template.yml
+
+vsftpd_anonymous_enable: true
+vsftpd_connect_from_port_20 : true
+vsftpd_listen: true
+vsftpd_local_enable : true
+vsftpd_syslog_enable : true
+vsftpd_write_enable : true
+vsftpd_chroot_local_user : true
+vsftpd_anon_root : true
+vsftpd_local_root : true
+
+Last lab.,
+
+First create this file. 
+vim ansible-vsftpd.yml
+
+nameL: FTP server is isntalled
+hosts: 
+    - ftpservers
+vars_files: 
+    - vars/defaults-template.yml
+    - vars/vars.yml
+tasks: 
+    - name: Packages are installed
+      yum: 
+        name: "{{ vsftpd_package }}"
+        state: present
+      
+      
+    - name: Ensrue that the serviced is started
+      service: 
+        name: "{{ vsfptd_service }}"
+        state: strted
+        enabled: true
+    
+    - name: Configuration file is installed
+      template: 
+        src: templates/vsftpd.conf.j2
+        dest: "{{ vsftpd_config_file }}"
+        owner: root
+        group: root
+        mode: '0600'
+        setype: etc_t
+     notify: restart vsftpd
+     
+     
+   - name: firewalld is installed
+     yum: 
+        name: firewalld
+        state: present
+        
+   - name: firewalld is started and enabled. 
+     service: 
+        name: firewalld
+        state: started
+        enabled: yes
+        
+        
+   - name: FTP port is open
+     firewalld: 
+        service: ftp
+        permanent: true
+        state: enabled
+        immediate: yes
+        
+        
+        
+    - name: Passfil data portts allowed thoug the firewall. 
+      firewalld: 
+        port: 21000-21020/tcp
+        permanent: yes
+        state: enabled
+        immediate: yes
+  
+  handles: 
+    - name: restart vsftpd
+      service: 
+        name: "{{ vsftpd_service }}"
+        state: restarted. 
+        
+        
+ site.yml
+    - import_playbook: ansible-vsftpd.yml
+  
+  FTP clients playbook> 
+    import_playbook: ftpclients.yml
+    
+    
+    
+cat vsftpd.conf.j2
+connect_from_port_20={{ 'YES' if vsftpd_connect_from_port_20 else 'NO' }}
+listen={{ 'YES' if vsftpd_listen else 'NO' }}
+pam_service_name=vsftpd
+syslog_enable={{ 'YES' if vsftpd_syslog_enable else 'NO' }}
+
+
+anonymous_enable={{ 'YES' if vsftpd_anonymous_enable else 'NO' }}
+
+{% if vsftpd_anon_root is defined %}llc
+anon_root={{ vsftpd_anon_root }}
+{% endif %}
+
+
+local_enable={{ 'YES' if vsftpd_write_enable else 'NO' }}
+
+{% if vsftpd_local_root is defined %}
+local_root={{ vsftpd_local_root }}
+{% endif %}
+
+local_umask=022
+write_enable={{ 'YES' if vsftpd_write_enable else 'NO' }}
+
+chroot_local_user={{ 'YES' if vsftpd_chroot_local_user else 'NO' }}
+
+pasv_enable=Yes
+pasv_min_port=21000
+pasv_max_port=21020
+
+vars.yml
+vsftpd_package: vsftpd
+vsftpd_service: vsftpd
+vsftpd_config_file: /etc/vsftpd/vsftpd.conf
+
+ftpcclients.yml
+name: Ensrue FTP Client configuration
+hosts: ftpclients
+tasks: 
+    - name: latest version of lftp is enabled.
+      yum: 
+        name: lftp
+        state: latest
+
+
+vim default_template.yml
+vsftpd_anonymous_enable: true
+vsftpd_connect_from_port_20 : true
+vsftpd_listen: true
+vsftpd_local_enable : true
+vsftpd_setype: public_content_t
+vsftpd_syslog_enable : true
+vsftpd_write_enable : true
+vsftpd_chroot_local_user : true
+vsftpd_anon_root : true
+vsftpd_local_root : true
+        
+        
+ansible.cfg
+[defaults]        
+remote_user=devops
+
+[privilege_escalation]
+become=True
+become_method=sudo
+become_user=root
+become_ask_pass=root
+
+
+inventory
+[ftpservers]
+serverb.lab.example.com
+serverd.lab.example.com
+
+[ftpclients]
+servera.lab.example.com
+serverc.lab.example.com
+
+               
+ 
+     
+     
+     
+     
+     
+     
+    
+    
+    
+    
+    
+    
+    
+    
+

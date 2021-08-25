@@ -1,0 +1,52 @@
+Lab 10.2
+--------------
+Material to build the lab environment. 
+
+cat vars.yml
+vsftpd_package: vsftpd
+vsftpd_service: vsftpd
+vsftpd_config_file: /etc/vsftpd/vsftpd.conf
+
+cat vsftpd.conf.j2
+connect_from_port_20={{ 'YES' if vsftpd_connect_from_port_20 else 'NO' }}
+listen={{ 'YES' if vsftpd_listen else 'NO' }}
+pam_service_name=vsftpd
+syslog_enable={{ 'YES' if vsftpd_syslog_enable else 'NO' }}
+
+
+anonymous_enable={{ 'YES' if vsftpd_anonymous_enable else 'NO' }}
+
+{% if vsftpd_anon_root is defined %}
+anon_root={{ vsftpd_anon_root }}
+{% endif %}
+
+
+local_enable={{ 'YES' if vsftpd_write_enable else 'NO' }}
+
+{% if vsftpd_local_root is defined %}
+local_root={{ vsftpd_local_root }}
+{% endif %}
+
+local_umask=022
+write_enable={{ 'YES' if vsftpd_write_enable else 'NO' }}
+
+chroot_local_user={{ 'YES' if vsftpd_chroot_local_user else 'NO' }}
+
+pasv_enable=Yes
+pasv_min_port=21000
+pasv_max_port=22000
+
+
+cat defaults-template.yml
+
+vsftpd_anonymous_enable: true
+vsftpd_connect_from_port_20 : true
+vsftpd_listen: true
+vsftpd_local_enable : true
+vsftpd_syslog_enable : true
+vsftpd_write_enable : true
+vsftpd_chroot_local_user : true
+vsftpd_anon_root : true
+vsftpd_local_root : true
+
+

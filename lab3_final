@@ -1,0 +1,170 @@
+How  final lab3 was set up. 
+
+
+This is on the web server end. 
+
+1) Install apache. Configure https with password. 
+Password steps. 
+a) Create directory /etc/httpd/secrets
+b) /path/to/htpasswd -c /etc/httpd/secrets/.htpasswd arvind
+c) 
+See if you can do it on conf.d directory. 
+<Directory "/var/www/html">
+  AuthType Basic
+  AuthName "Authentication Required"
+  AuthUserFile "/etc/httpd/secrets/.htpasswd"
+  Require valid-user
+
+  Order allow,deny
+  Allow from all
+</Directory>
+
+
+4) Try putting this in the directory /var/www/html
+SSLEngine on
+SSLCertificateFile /path/to/your_domain_name.crt
+SSLCertificateKeyFile /path/to/your_private.key
+
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
+
+
+Approach. 
+1) provision environemnt using terraform. Bastion itself is our workstation.
+2) 
+
+2) Copy the required files in not required. 
+
+SSLEngine on
+SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
+SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+
+1)
+.htaccess file in /var/www/html
+
+AuthType Basic
+AuthName "Secure Content"
+AuthUserFile /etc/httpd/secrets/.htpasswd
+require valid-user
+
+
+2) httpd.conf file in /etc/httpd/httpd.conf
+/etc/httpd/conf/httpd.conf
+
+ServerRoot "/etc/httpd"
+Listen 80
+Include conf.modules.d/*.conf
+
+User apache
+Group apache
+ServerAdmin root@localhost
+<Directory />
+    AllowOverride none
+    Require all denied
+</Directory>
+DocumentRoot "/var/www/html"
+<Directory "/var/www">
+    AllowOverride None
+    Require all granted
+</Directory>
+<Directory "/var/www/html">
+    Options Indexes FollowSymLinks
+    AllowOverride AuthConfig
+    Require all granted
+</Directory>
+
+<IfModule dir_module>
+    DirectoryIndex index.html
+</IfModule>
+<Files ".ht*">
+    Require all denied
+</Files>
+ErrorLog "logs/error_log"
+LogLevel warn
+<IfModule log_config_module>
+    LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+    LogFormat "%h %l %u %t \"%r\" %>s %b" common
+
+    <IfModule logio_module>
+      LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %I %O" combinedio
+    </IfModule>
+    CustomLog "logs/access_log" combined
+</IfModule>
+<IfModule alias_module>
+    ScriptAlias /cgi-bin/ "/var/www/cgi-bin/"
+</IfModule>
+
+<Directory "/var/www/cgi-bin">
+    AllowOverride None
+    Options None
+    Require all granted
+</Directory>
+<IfModule mime_module>
+    TypesConfig /etc/mime.types
+    AddType application/x-compress .Z
+    AddType application/x-gzip .gz .tgz
+    AddType text/html .shtml
+    AddOutputFilter INCLUDES .shtml
+</IfModule>
+
+AddDefaultCharset UTF-8
+
+<IfModule mime_magic_module>
+    MIMEMagicFile conf/magic
+</IfModule>
+
+EnableSendfile on
+IncludeOptional conf.d/*.conf
+
+
+1) Now all the files to do the work is in 
+/root/rhca-ansible/chapter3
+2) then  write the playbook according to the instructions.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+yum install -y python3
+pip3 install virtualenv
+python3 -m virtualenv ansible
+source ansible/bin/activate
+python3 -m  pip install ansible
+
+
+
+
+
+
+
+
+
+
+
+git password for next 30 days.
+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
+
+
